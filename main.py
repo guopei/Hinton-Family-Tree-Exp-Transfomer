@@ -21,8 +21,6 @@ def run_once(random_seed):
         optimizer.zero_grad()
 
         _, loss = model(train_inputs, train_outputs)
-
-        # print(f"Epoch {i} loss: {loss.item()}")
         
         loss.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
@@ -41,7 +39,7 @@ def run_once(random_seed):
         total = predict.numel()
 
         test_acc = correct / total  
-        print(f"Random seed {random_seed:02d} Test accuracy: {test_acc:.2f}")
+        print(f"Random seed {random_seed:02d} Test accuracy: {test_acc:.2f} Train loss: {loss.item():.4f}")
 
         return test_acc
 
