@@ -116,8 +116,6 @@ class GPT(nn.Module):
         if targets is not None:
             # if we are given some desired targets also calculate the loss
             logits = self.lm_head(x)         
-            logits = logits[:, -1, :]
-            targets = targets[:, -1]
             loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.reshape(-1), ignore_index=-1)
             
         else:
