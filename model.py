@@ -10,10 +10,10 @@ from data import voc_size, block_size
 class GPTConfig:
     block_size: int = block_size
     vocab_size: int = voc_size
-    n_layer: int = 6
-    n_head: int = 6
-    n_embd: int = 36
-    dropout: float = 0.1
+    n_layer: int = 8
+    n_head: int = 8
+    n_embd: int = 64
+    dropout: float = 0.2
 
 class MLP(nn.Module):
 

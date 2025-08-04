@@ -10,7 +10,7 @@ def run_once(random_seed):
     config = GPTConfig()
     model = GPT(config)
 
-    train_epochs = 100
+    train_epochs = 200
     learning_rate = 1e-2
     optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
 
