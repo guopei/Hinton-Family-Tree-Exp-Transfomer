@@ -108,9 +108,9 @@ relationships = [
     ("Marco", "has_sister", ["Angela"]),
 ]
 
-names = set([name for name, _, _ in relationships])
-relations = set([relation for _, relation, _ in relationships])
-name_relations = names | relations
+names = sorted(list(set([name for name, _, _ in relationships])))
+relations = sorted(list(set([relation for _, relation, _ in relationships])))
+name_relations = names + relations
 
 name_relations_to_index = {name_relation: i for i, name_relation in enumerate(name_relations)}
 

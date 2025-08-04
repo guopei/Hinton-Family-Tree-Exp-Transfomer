@@ -41,7 +41,7 @@ def run_once(random_seed):
         total = predict.numel()
 
         test_acc = correct / total  
-        print(f"Random seed {random_seed} Test accuracy: {test_acc}")
+        print(f"Random seed {random_seed:02d} Test accuracy: {test_acc:.2f}")
 
         return test_acc
 
