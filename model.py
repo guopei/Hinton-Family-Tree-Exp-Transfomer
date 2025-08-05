@@ -98,6 +98,7 @@ class GPT(nn.Module):
             ln_f = nn.LayerNorm(config.n_embd),
         ))
         self.lm_head = nn.Linear(config.n_embd, config.vocab_size)
+        self.loss = nn.BCEWithLogitsLoss()
         
 
     def forward(self, idx, targets=None):
@@ -116,7 +117,7 @@ class GPT(nn.Module):
         if targets is not None:
             # if we are given some desired targets also calculate the loss
             logits = self.lm_head(x)         
-            loss = F.cross_entropy(logits.view(-1, logits.size(-1)), targets.reshape(-1), ignore_index=-1)
+            loss = self.loss(logits.view(-1, logits.size(-1)), targets.view(-1, targets.size(-1)))
             
         else:
             # inference-time mini-optimization: only forward the lm_head on the very last position

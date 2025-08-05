@@ -2,6 +2,9 @@ import random
 import torch
 from model import GPT, GPTConfig
 from data import prepare_data
+from torcheval.metrics import MultilabelAccuracy
+
+metric = MultilabelAccuracy()
 
 def run_once(random_seed):
     torch.manual_seed(random_seed)
@@ -14,13 +17,16 @@ def run_once(random_seed):
     learning_rate = 1e-2
     optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
 
-    train_inputs, train_outputs, test_inputs, test_outputs_tensor = prepare_data()
+    train_inputs, train_targets, test_inputs, test_targets = prepare_data()
 
     model.train()
     for i in range(train_epochs):
         optimizer.zero_grad()
 
-        _, loss = model(train_inputs, train_outputs)
+        _, loss = model(train_inputs, train_targets)
+
+        if i % 10 == 0:
+            print(f"Random seed {random_seed:02d} Epoch {i} loss: {loss.item():.4f}")
         
         loss.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
@@ -29,16 +35,13 @@ def run_once(random_seed):
     model.eval()
     with torch.no_grad():
         logits, _ = model(test_inputs)
-        test_outputs_tensor = test_outputs_tensor[:, -1, :]
-        logits = logits[:, -1, :]
+        logits = logits[:, -1, :].detach()
+        test_targets = test_targets[:, -1, :].detach()
 
-        predict = logits.argmax(dim=-1)
-        gt = test_outputs_tensor.argmax(dim=-1)
+        metric.reset()
+        metric.update(logits, test_targets)
+        test_acc = metric.compute().item()
 
-        correct = (predict == gt).sum().item()
-        total = predict.numel()
-
-        test_acc = correct / total  
         print(f"Random seed {random_seed:02d} Test accuracy: {test_acc:.2f} Train loss: {loss.item():.4f}")
 
         return test_acc

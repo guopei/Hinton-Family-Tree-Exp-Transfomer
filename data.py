@@ -122,22 +122,20 @@ dataset_size = len(relationships)
 def prepare_data():
     random.shuffle(relationships)
 
-    word_sequences = torch.zeros(dataset_size, (block_size+1), dtype=torch.long)
+    input_sequences = torch.zeros(dataset_size, block_size, dtype=torch.long)
+    target_sequences = torch.zeros(dataset_size, block_size, voc_size)
 
     for i, (name_input, relation_input, name_output) in enumerate(relationships):
-        word_sequences[i][0] = name_relations_to_index[name_input]
-        word_sequences[i][1] = name_relations_to_index[relation_input]
-        word_sequences[i][2] = name_relations_to_index[name_output[0]]
+        input_sequences[i][0] = name_relations_to_index[name_input]
+        input_sequences[i][1] = name_relations_to_index[relation_input]
+        target_sequences[i][0][name_relations_to_index[relation_input]] = 1
+        for name in name_output:
+            target_sequences[i][1][name_relations_to_index[name]] = 1
 
-    train_inputs = word_sequences[:train_num][:, :block_size]
-    train_outputs = word_sequences[:train_num][:, -block_size:]
+    train_inputs = input_sequences[:train_num]
+    train_outputs = target_sequences[:train_num]
 
-    test_inputs = word_sequences[train_num:][:, :block_size]
-    test_outputs = word_sequences[train_num:][:, -block_size:]
+    test_inputs = input_sequences[train_num:]
+    test_outputs = target_sequences[train_num:]
 
-    test_outputs_tensor = torch.zeros(test_outputs.shape[0], test_outputs.shape[1], voc_size, dtype=torch.long)
-    for i in range(test_outputs.shape[0]):
-        for j in range(test_outputs.shape[1]):
-            test_outputs_tensor[i][j][test_outputs[i][j]] = 1
-
-    return train_inputs, train_outputs, test_inputs, test_outputs_tensor
+    return train_inputs, train_outputs, test_inputs, test_outputs
