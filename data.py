@@ -119,7 +119,7 @@ block_size = 2
 train_num = 100
 dataset_size = len(relationships)
 
-def prepare_data():
+def prepare_data(device):
     random.shuffle(relationships)
 
     input_sequences = torch.zeros(dataset_size, block_size, dtype=torch.long)
@@ -138,4 +138,4 @@ def prepare_data():
     test_inputs = input_sequences[train_num:]
     test_outputs = target_sequences[train_num:]
 
-    return train_inputs, train_outputs, test_inputs, test_outputs
+    return train_inputs.to(device), train_outputs.to(device), test_inputs.to(device), test_outputs.to(device)

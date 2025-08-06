@@ -13,7 +13,8 @@ class GPTConfig:
     n_layer: int = 8
     n_head: int = 4
     n_embd: int = 64
-    dropout: float = 0.2
+    dropout: float = 0.1
+    device: str = "cuda" if torch.cuda.is_available() else "cpu"
 
 class MLP(nn.Module):
     def __init__(self, config):
@@ -99,12 +100,13 @@ class GPT(nn.Module):
         ))
         self.lm_head = nn.Linear(config.n_embd, config.vocab_size)
         self.loss = nn.BCEWithLogitsLoss()
+        self.sigmoid = nn.Sigmoid()
         
 
     def forward(self, idx, targets=None):
         b, t = idx.size()
         assert t <= self.config.block_size, f"Cannot forward sequence of length {t}, block size is only {self.config.block_size}"
-        pos = torch.arange(0, t) # shape (t)
+        pos = torch.arange(0, t).to(self.config.device) # shape (t)
 
         # forward the GPT model itself
         tok_emb = self.transformer.wte(idx) # token embeddings of shape (b, t, n_embd)
@@ -122,6 +124,7 @@ class GPT(nn.Module):
         else:
             # inference-time mini-optimization: only forward the lm_head on the very last position
             logits = self.lm_head(x) # note: using list [-1] to preserve the time dim
+            logits = self.sigmoid(logits)
             loss = None
 
         return logits, loss
