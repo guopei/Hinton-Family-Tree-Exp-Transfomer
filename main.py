@@ -15,12 +15,6 @@ def get_accuracy(logits, targets):
     acc = metric.compute().item()
     return acc
 
-def get_accuracy_2(logits, targets):
-    logits = logits.argmax(dim=1)
-    targets = targets.argmax(dim=1)
-    acc = (logits == targets).float().mean()
-    return acc
-
 def run_once(random_seed):
     time_start = time.time()
     torch.manual_seed(random_seed)

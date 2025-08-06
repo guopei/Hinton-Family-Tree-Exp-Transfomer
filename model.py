@@ -10,7 +10,7 @@ from data import voc_size, block_size
 class GPTConfig:
     block_size: int = block_size
     vocab_size: int = voc_size
-    n_layer: int = 8
+    n_layer: int = 4
     n_head: int = 4
     n_embd: int = 64
     dropout: float = 0.1
