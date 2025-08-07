@@ -125,4 +125,4 @@ def run_all(config=None):
 
 if __name__ == "__main__":
     sweep_id = wandb.sweep(sweep_config, project="family-tree-llm")
-    wandb.agent(sweep_id, function=run_all, count=5)
+    wandb.agent(sweep_id, function=run_all, count=50)
