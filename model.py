@@ -6,14 +6,15 @@ import torch.nn.functional as F
 
 from data import voc_size, block_size
 
+
 @dataclass
 class GPTConfig:
     block_size: int = block_size
     vocab_size: int = voc_size
-    n_layer: int = 4
-    n_head: int = 4
+    n_layer: int = 2
+    n_head: int = 2
     n_embd: int = 64
-    dropout: float = 0.1
+    dropout: float = 0.2
     device: str = "cuda" if torch.cuda.is_available() else "cpu"
 
 class MLP(nn.Module):
