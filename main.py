@@ -34,7 +34,6 @@ def run_once(random_seed):
     train_inputs, train_targets, test_inputs, test_targets = prepare_data(device)
 
     train_input_first = (train_inputs[0]).tolist()
-    print(f"Train input first: {train_input_first}")
 
     model.train()
     for i in range(train_epochs):
@@ -56,7 +55,7 @@ def run_once(random_seed):
         time_end = time.time()
         time_taken = time_end - time_start
 
-        print(f"Random seed {random_seed:02d} Test accuracy: {test_acc:.2f} Train loss: {loss.item():.4f}, Train acc: {train_acc:.2f}, Time taken: {time_taken:.2f}s, device: {device}")
+        print(f"Random seed {random_seed:02d} Test accuracy: {test_acc:.2f} Train loss: {loss.item():.4f}, Train acc: {train_acc:.2f}, Time taken: {time_taken:.2f}s, device: {device}, WTE weight: {wte_weight}, Train input first: {train_input_first}")
 
         return train_acc, test_acc, loss.item()
 
