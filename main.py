@@ -21,15 +21,15 @@ sweep_config = {
     'parameters': {
         'n_layer': {
             'min': 2,
-            'max': 10
+            'max': 3
         },
         'n_head': {
             'min': 2,
-            'max': 10
+            'max': 3
         },
         'n_embd_factor': {
-            'min': 4,
-            'max': 16
+            'min': 2,
+            'max': 3
         },
         'dropout': {
             'min': 0.0,
@@ -50,9 +50,26 @@ def get_accuracy(logits, targets):
 
 def run_once(random_seed):
     time_start = time.time()
+    
+    # Set all random seeds for complete reproducibility
     torch.manual_seed(random_seed)
     torch.cuda.manual_seed(random_seed)
+    torch.cuda.manual_seed_all(random_seed)  # For multi-GPU setups
     random.seed(random_seed)
+    
+    # Set Python hash seed for complete reproducibility
+    import os
+    os.environ['PYTHONHASHSEED'] = str(random_seed)
+    
+    # Set numpy seed if numpy is used
+    try:
+        import numpy as np
+        np.random.seed(random_seed)
+    except ImportError:
+        pass
+
+    train_inputs, train_targets, test_inputs, test_targets = prepare_data(device)
+    train_input_first = (train_inputs[0]).tolist()
 
     wandb_config = wandb.config
     gpt_config = GPTConfig(device=device)
@@ -62,13 +79,12 @@ def run_once(random_seed):
     gpt_config.dropout = wandb_config.dropout
 
     model = GPT(gpt_config)
+    wte_weight = (model.transformer.wte.weight.sum()).item()
     model.to(device)
 
     train_epochs = 400
     learning_rate = 1e-2
     optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
-
-    train_inputs, train_targets, test_inputs, test_targets = prepare_data(device)
 
     model.train()
     for i in range(train_epochs):
@@ -90,12 +106,12 @@ def run_once(random_seed):
         time_end = time.time()
         time_taken = time_end - time_start
 
-        print(f"Random seed {random_seed:02d} Test accuracy: {test_acc:.2f} Train loss: {loss.item():.4f}, Train acc: {train_acc:.2f}, Time taken: {time_taken:.2f}s, device: {device}")
+        print(f"Random seed {random_seed:02d} Test accuracy: {test_acc:.2f} Train loss: {loss.item():.4f}, Train acc: {train_acc:.2f}, Time taken: {time_taken:.2f}s, device: {device}, WTE weight: {wte_weight}, Train input first: {train_input_first}")
 
         return train_acc, test_acc, loss.item()
 
 def run_all(config=None):
-    total_run = 50
+    total_run = 5
     print(f"Training and evaluating with {total_run} random seeds")
     test_accs = []
     train_accs = []
