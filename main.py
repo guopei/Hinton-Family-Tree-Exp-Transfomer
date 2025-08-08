@@ -4,39 +4,6 @@ from model import GPT, GPTConfig
 from data import prepare_data
 from torcheval.metrics import MultilabelAccuracy
 import time
-import wandb
-
-# Start a new wandb run to track this script.
-run = wandb.init(
-    # Set the wandb project where this run will be logged.
-    project="family-tree-llm",
-)
-
-sweep_config = {
-    'method': 'bayes',
-    'metric': {
-        'name': 'average_test_accuracy',
-        'goal': 'maximize'   
-    },
-    'parameters': {
-        'n_layer': {
-            'min': 2,
-            'max': 10
-        },
-        'n_head': {
-            'min': 2,
-            'max': 10
-        },
-        'n_embd_factor': {
-            'min': 4,
-            'max': 16
-        },
-        'dropout': {
-            'min': 0.0,
-            'max': 0.3
-        },
-    }
-}
 
 metric = MultilabelAccuracy()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -54,14 +21,10 @@ def run_once(random_seed):
     torch.cuda.manual_seed(random_seed)
     random.seed(random_seed)
 
-    wandb_config = wandb.config
     gpt_config = GPTConfig(device=device)
-    gpt_config.n_layer = wandb_config.n_layer
-    gpt_config.n_head = wandb_config.n_head
-    gpt_config.n_embd = wandb_config.n_embd_factor * wandb_config.n_head
-    gpt_config.dropout = wandb_config.dropout
-
     model = GPT(gpt_config)
+    wte_weight = (model.transformer.wte.weight.sum()).item()
+    print(f"WTE weight: {wte_weight}")
     model.to(device)
 
     train_epochs = 400
@@ -69,6 +32,9 @@ def run_once(random_seed):
     optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
 
     train_inputs, train_targets, test_inputs, test_targets = prepare_data(device)
+
+    train_input_first = (train_inputs[0]).tolist()
+    print(f"Train input first: {train_input_first}")
 
     model.train()
     for i in range(train_epochs):
@@ -94,35 +60,27 @@ def run_once(random_seed):
 
         return train_acc, test_acc, loss.item()
 
-def run_all(config=None):
+def run_all():
     total_run = 50
     print(f"Training and evaluating with {total_run} random seeds")
     test_accs = []
     train_accs = []
     train_losses = []
     total_perfect_accs = 0
-    with wandb.init(config=config) as run:
-        for i in range(total_run):
-            train_acc, test_acc, train_loss = run_once(i)
-            train_accs.append(train_acc)
-            test_accs.append(test_acc)
-            train_losses.append(train_loss)
-            if test_acc > 0.99:
-                total_perfect_accs += 1
+    for i in range(total_run):
+        train_acc, test_acc, train_loss = run_once(i)
+        train_accs.append(train_acc)
+        test_accs.append(test_acc)
+        train_losses.append(train_loss)
+        if test_acc > 0.99:
+            total_perfect_accs += 1
 
 
-        print(f"Average test accuracy: {sum(test_accs) / total_run}")
-        print(f"Total perfect accuracies percentage: {total_perfect_accs / total_run}")
-        print(f"Average train accuracy: {sum(train_accs) / total_run}")
-        print(f"Average train loss: {sum(train_losses) / total_run}")
+    print(f"Average test accuracy: {sum(test_accs) / total_run}")
+    print(f"Total perfect accuracies percentage: {total_perfect_accs / total_run}")
+    print(f"Average train accuracy: {sum(train_accs) / total_run}")
+    print(f"Average train loss: {sum(train_losses) / total_run}")
 
-        wandb.log({
-            "average_test_accuracy": sum(test_accs) / total_run,
-            "total_perfect_accuracies_percentage": total_perfect_accs / total_run,
-            "average_train_loss": sum(train_losses) / total_run,
-            "average_train_accuracy": sum(train_accs) / total_run,
-        })
 
 if __name__ == "__main__":
-    sweep_id = wandb.sweep(sweep_config, project="family-tree-llm")
-    wandb.agent(sweep_id, function=run_all, count=50)
+    run_all()
