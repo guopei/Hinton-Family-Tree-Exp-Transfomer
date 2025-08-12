@@ -4,10 +4,15 @@ from model import GPT, GPTConfig
 from data import prepare_data
 from torcheval.metrics import MultilabelAccuracy
 import time
+from torch.optim.lr_scheduler import LambdaLR
+
 
 metric = MultilabelAccuracy()
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 device = "cpu"
+
+def linear_warmup(step, warmup_steps):
+    return min(1.0, step / warmup_steps)
 
 def get_accuracy(logits, targets):
     metric.reset()
@@ -23,16 +28,20 @@ def run_once(random_seed):
 
     gpt_config = GPTConfig(device=device)
     model = GPT(gpt_config)
+    # for debugging random seed
     wte_weight = (model.transformer.wte.weight.sum()).item()
     model.to(device)
 
     train_epochs = 400
-    learning_rate = 1e-2
+    learning_rate = 2e-2
     optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
 
     train_inputs, train_targets, test_inputs, test_targets = prepare_data(device)
-
+    # for debugging random seed
     train_input_first = (train_inputs[0]).tolist()
+
+    scheduler = LambdaLR(optimizer, lr_lambda=lambda step: linear_warmup(step, train_epochs // 10))
+
 
     model.train()
     for i in range(train_epochs):
@@ -43,6 +52,7 @@ def run_once(random_seed):
         loss.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
         optimizer.step()
+        scheduler.step()
 
     model.eval()
     with torch.no_grad():
