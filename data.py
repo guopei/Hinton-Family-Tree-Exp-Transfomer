@@ -119,7 +119,7 @@ block_size = 2
 train_num = 100
 dataset_size = len(relationships)
 
-def prepare_data(device):
+def prepare_data():
     # Create a copy to avoid modifying the global relationships list
     relationships_copy = relationships.copy()
     random.shuffle(relationships_copy)
@@ -140,4 +140,4 @@ def prepare_data(device):
     test_inputs = input_sequences[train_num:]
     test_outputs = target_sequences[train_num:]
 
-    return train_inputs.to(device), train_outputs.to(device), test_inputs.to(device), test_outputs.to(device)
+    return train_inputs, train_outputs, test_inputs, test_outputs
