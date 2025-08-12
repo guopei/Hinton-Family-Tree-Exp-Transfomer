@@ -12,9 +12,9 @@ class GPTConfig:
     block_size: int = block_size
     vocab_size: int = voc_size
     n_layer: int = 2
-    n_head: int = 10
-    n_embd: int = 130
-    dropout: float = 0.2396290738932942
+    n_head: int = 14
+    n_embd: int = 112
+    dropout: float = 0.2
     device: str = "cuda" if torch.cuda.is_available() else "cpu"
 
 class MLP(nn.Module):

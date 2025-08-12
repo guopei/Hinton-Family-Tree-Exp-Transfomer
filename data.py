@@ -120,12 +120,13 @@ train_num = 100
 dataset_size = len(relationships)
 
 def prepare_data(device):
-    random.shuffle(relationships)
+    relationships_copy = relationships.copy()
+    random.shuffle(relationships_copy)
 
     input_sequences = torch.zeros(dataset_size, block_size, dtype=torch.long)
     target_sequences = torch.zeros(dataset_size, block_size, voc_size)
 
-    for i, (name_input, relation_input, name_output) in enumerate(relationships):
+    for i, (name_input, relation_input, name_output) in enumerate(relationships_copy):
         input_sequences[i][0] = name_relations_to_index[name_input]
         input_sequences[i][1] = name_relations_to_index[relation_input]
         target_sequences[i][0][name_relations_to_index[relation_input]] = 1

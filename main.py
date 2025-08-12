@@ -24,7 +24,6 @@ def run_once(random_seed):
     gpt_config = GPTConfig(device=device)
     model = GPT(gpt_config)
     wte_weight = (model.transformer.wte.weight.sum()).item()
-    print(f"WTE weight: {wte_weight}")
     model.to(device)
 
     train_epochs = 400
