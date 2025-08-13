@@ -34,7 +34,7 @@ def run_once(random_seed):
 
     train_epochs = 400
     learning_rate = 2e-2
-    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=learning_rate, weight_decay=0.05)
 
     train_inputs, train_targets, test_inputs, test_targets = prepare_data(device)
     # for debugging random seed
