@@ -26,9 +26,9 @@ I was able to get 0.715 average accuracy using transformers.
 
 Thing I found help with validation accuracy:
 
-Loss on both outputs
-Weight decay
-Hyperparameter searching (num of layer, num of head, embedding size, dropout rate)
-learning rate warmup
-gradient clipping
-Do not touch anything in the model
+- Loss on both outputs
+- Weight decay
+- Hyperparameter searching (num of layer, num of head, embedding size, dropout rate)
+- Learning rate warmup
+- Gradient clipping
+- Do not touch anything in the model
