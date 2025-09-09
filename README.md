@@ -1,34 +1,12 @@
 # Hinton Family Tree Experiment Transformer
 
-A research project exploring whether small transformer models can learn family relationships. This is a sister project of my [Hinton Family Tree Repro](https://github.com/guopei/Hinton-Family-Tree-Exp-Repro) project.
-
-## Overview
-Minimal GPT-style transformer trained on synthetic family tree data (20 people, 12 relationship types). Investigates minimum viable architecture for relational reasoning.
+This is a sister repo of my [Hinton Family Tree Repro](https://github.com/guopei/Hinton-Family-Tree-Exp-Repro) experiment. This code explores using small transformers to learn to predict family relations proposed by Hinton in his 1986 paper.
 
 ## Quick Start
 ```bash
 uv run main.py
 ```
 
-I was able to get 0.715 average accuracy using transformers. 
+Due to the discrepency of the low-level math accelation library on different hardware, the accuracy number ranges from 0.715 (A Windows VM) to 0.7 (Macbook air M4 2025) to 0.665 (Ubuntu 24.04.03 LTS on Intel i7-12700K CPU). Details on reproducibility can be found [here](https://peiguo.me/posts/hinton-family-tree-experiment/#reproducibility-the-ghost-that-haunts-my-mind) in my blogpost.
 
-## Features
-- Configurable layers, heads, embedding dimensions
-- Multi-label classification for relationships
-- Reproducible training (50 random seeds)
-- Hyperparameter sweep results included
-
-## Files
-- `main.py` - Training script
-- `model.py` - Transformer implementation  
-- `data.py` - Family tree dataset
-- `pyproject.toml` - Dependencies
-
-Thing I found help with validation accuracy:
-
-- Loss on both outputs
-- Weight decay
-- Hyperparameter searching (num of layer, num of head, embedding size, dropout rate)
-- Learning rate warmup
-- Gradient clipping
-- Do not touch anything in the model
+More details on this experiment can be found [here](https://peiguo.me/posts/hinton-family-tree-experiment/#transformer-architecture).
